@@ -21,15 +21,23 @@
       </view>
     </view>
 
-    <view v-if="loading" class="loading">加载中...</view>
+    <view v-if="loading" class="loading">
+      <uni-icons type="spinner-cycle" size="24" color="#007AFF"></uni-icons>
+      <text>加载中...</text>
+    </view>
     <view v-else-if="error" class="error">{{ error }}</view>
-    <view v-else-if="notices.length === 0" class="error">暂无数据</view>
+    <view v-else-if="notices.length === 0" class="empty">暂无数据</view>
     <view v-else class="job-list">
       <view v-for="job in notices" :key="job.id" class="job-item" @click="navigateToDetail(job.id)">
         <view class="job-title">{{ job.title }}</view>
         <view class="job-info">
-          <text class="job-location">{{ job.province }}</text>
-          <text class="job-type">{{ job.type === 1 ? '公务员' : '事业编' }}</text>
+          <text class="job-location">
+            <uni-icons type="location" size="14" color="#666"></uni-icons>
+            {{ job.province }}
+          </text>
+          <text class="job-type" :class="{ 'type-civil': job.type === 1, 'type-institution': job.type === 2 }">
+            {{ job.type === 1 ? '公务员' : '事业编' }}
+          </text>
         </view>
       </view>
     </view>
@@ -37,18 +45,18 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue';
-import {useNotices} from "@/utils/requests";
+import { ref, watch, onMounted } from 'vue';
+import { useNotices } from "@/utils/requests";
 
 const examTypes = ['全部', '公务员', '事业编'];
 const provinces = [
   '全部',
-  '北京', '天津', '上海', '重庆',  // 直辖市
+  '北京', '天津', '上海', '重庆',
   '河北', '山西', '辽宁', '吉林', '黑龙江', '江苏', '浙江', '安徽',
   '福建', '江西', '山东', '河南', '湖北', '湖南', '广东', '海南',
-  '四川', '贵州', '云南', '陕西', '甘肃', '青海',  // 省
-  '内蒙古', '广西', '西藏', '宁夏', '新疆',  // 自治区
-  '香港', '澳门', '台湾'  // 特别行政区和台湾省
+  '四川', '贵州', '云南', '陕西', '甘肃', '青海',
+  '内蒙古', '广西', '西藏', '宁夏', '新疆',
+  '香港', '澳门', '台湾'
 ];
 const selectedExam = ref('全部');
 const selectedProvince = ref('全部');
@@ -71,12 +79,13 @@ watch([selectedExam, selectedProvince], async ([newExam, newProvince]) => {
 
 const navigateToDetail = (id) => {
   uni.navigateTo({
-    url: `/pages/notice-detail/notice-detail?id=${id}`
+    url: `/pages/notice-detail/notice-detail?id=${encodeURIComponent(id)}`
   });
 };
 
-// Initial load
-loadNotices();
+onMounted(() => {
+  loadNotices();
+});
 </script>
 
 <style scoped>
@@ -87,24 +96,25 @@ loadNotices();
 
 .filter-container {
   background-color: #fff;
-  padding: 10px 15px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .filter-header {
   display: flex;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .filter-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   margin-right: 20px;
-  color: #999;
+  color: #333;
+  position: relative;
 }
 
 .filter-title.active {
   color: #007AFF;
-  position: relative;
 }
 
 .filter-title.active::after {
@@ -113,22 +123,27 @@ loadNotices();
   bottom: -5px;
   left: 0;
   width: 100%;
-  height: 2px;
+  height: 3px;
   background-color: #007AFF;
+  border-radius: 1.5px;
 }
 
 .filters {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
 }
 
 .filter-item {
-  width: 48%; /* 略微小于50%以确保有一些间隔 */
+  width: 48%;
   background-color: #ffffff;
-  border: 1px solid #eeeeee;
-  border-radius: 4px;
-  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+.filter-item:active {
+  background-color: #f0f0f0;
 }
 
 .picker {
@@ -138,34 +153,73 @@ loadNotices();
 }
 
 .job-list {
-  margin-top: 10px;
+  padding: 10px;
 }
 
 .job-item {
   background-color: #fff;
-  padding: 15px;
-  margin-bottom: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.job-item:active {
+  transform: scale(0.98);
 }
 
 .job-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  color: #333;
 }
 
 .job-info {
   display: flex;
-  font-size: 12px;
-  color: grey;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
 }
 
-.job-location, .job-type {
-  margin-right: 10px;
+.job-location {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
 }
 
-.loading, .error {
-  text-align: center;
-  padding: 20px;
+.job-type {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.type-civil {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.type-institution {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.loading, .error, .empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
   font-size: 16px;
+  color: #666;
+}
+
+.loading {
+  color: #007AFF;
+}
+
+.error {
+  color: #ff4d4f;
 }
 </style>
