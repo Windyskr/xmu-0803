@@ -9,7 +9,9 @@
         <text>{{ notice.type === 1 ? '公务员' : '事业编' }}</text>
         <text>{{ notice.addTime }}</text>
       </view>
-      <view class="notice-digest">{{ notice.digest }}</view>
+      <view class="notice-digest">
+        <text v-for="(line, index) in digestLines" :key="index">{{ line }}</text>
+      </view>
       <rich-text :nodes="notice.content"></rich-text>
 
       <view v-if="parsedAffix.length > 0" class="notice-affix">
@@ -21,7 +23,7 @@
       </view>
 
       <view v-if="notice.sourceUrl" class="source-url">
-        <text class="source-url-label">原文链接：</text>
+        <text class="source-url-label">原文链接（长按复制）：</text>
         <text class="source-url-content" @longpress="copySourceUrl">{{ notice.sourceUrl }}</text>
       </view>
     </view>
@@ -45,10 +47,15 @@ onMounted(() => {
   loadNoticeDetail(props.id);
 });
 
+const digestLines = computed(() => {
+  if (!notice.value || !notice.value.digest) return [];
+  return notice.value.digest.split('\n').filter(line => line.trim() !== '');
+});
+
 const parsedAffix = computed(() => {
   if (!notice.value || !notice.value.affix) return [];
   try {
-    // console.log('Parsing affix:', notice.value.affix);
+    console.log('Parsing affix:', notice.value.affix);
     return new Function('return ' + notice.value.affix)();
   } catch (e) {
     console.error('Failed to parse affix:', e);
@@ -151,6 +158,11 @@ const downloadFile = (item) => {
   padding: 10px;
   margin-bottom: 15px;
   font-size: 14px;
+}
+
+.notice-digest text {
+  display: block;
+  margin-bottom: 5px;
 }
 
 .notice-affix {
