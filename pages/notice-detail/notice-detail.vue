@@ -9,13 +9,13 @@
         <text>{{ notice.type === 1 ? '公务员' : '事业编' }}</text>
         <text>{{ notice.addTime }}</text>
       </view>
-      <view class="notice-digest">
+      <view class="notice-digest" v-if="digestLines.length > 0">
         <text v-for="(line, index) in digestLines" :key="index">{{ line }}</text>
       </view>
       <rich-text :nodes="notice.content"></rich-text>
 
       <view v-if="parsedAffix.length > 0" class="notice-affix">
-        <view class="affix-title">附件</view>
+        <view class="affix-title">附件（点击下载）</view>
         <view v-for="(item, index) in parsedAffix" :key="index" class="affix-item" @click="downloadFile(item)">
           <image src="/static/file-icon.png" class="file-icon" />
           <text class="affix-name">{{ item.title }}</text>

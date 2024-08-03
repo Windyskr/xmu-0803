@@ -23,6 +23,7 @@
 
     <view v-if="loading" class="loading">加载中...</view>
     <view v-else-if="error" class="error">{{ error }}</view>
+    <view v-else-if="notices.length === 0" class="error">暂无数据</view>
     <view v-else class="job-list">
       <view v-for="job in notices" :key="job.id" class="job-item" @click="navigateToDetail(job.id)">
         <view class="job-title">{{ job.title }}</view>
@@ -166,9 +167,5 @@ loadNotices();
   text-align: center;
   padding: 20px;
   font-size: 16px;
-}
-
-.error {
-  color: red;
 }
 </style>
