@@ -3,7 +3,13 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "首页"
+			}
+		},
+		{
+			"path": "pages/notice-detail/notice-detail",
+			"style": {
+				"navigationBarTitleText": "通知详情"
 			}
 		}
 	],

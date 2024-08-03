@@ -42,3 +42,39 @@ export const useNotices = () => {
 
     return { notices, loading, error, loadNotices };
 };
+
+export const fetchNoticeDetail = async (id) => {
+    try {
+        const response = await fetch(`${BASE_URL}/notices/${id}`);
+        const data = await response.json();
+        if (data.code === 0) {
+            return data.data;
+        } else {
+            console.log('Failed to fetch notice detail:', data);
+            // throw new Error('Failed to fetch notice detail');
+        }
+    } catch (error) {
+        console.error('Error fetching notice detail:', error);
+        // throw error;
+    }
+};
+
+export const useNoticeDetail = () => {
+    const notice = ref(null);
+    const loading = ref(false);
+    const error = ref(null);
+
+    const loadNoticeDetail = async (id) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            notice.value = await fetchNoticeDetail(id);
+        } catch (e) {
+            error.value = e.message;
+        } finally {
+            loading.value = false;
+        }
+    };
+
+    return { notice, loading, error, loadNoticeDetail };
+};

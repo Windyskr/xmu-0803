@@ -24,7 +24,7 @@
     <view v-if="loading" class="loading">加载中...</view>
     <view v-else-if="error" class="error">{{ error }}</view>
     <view v-else class="job-list">
-      <view v-for="job in notices" :key="job.id" class="job-item">
+      <view v-for="job in notices" :key="job.id" class="job-item" @click="navigateToDetail(job.id)">
         <view class="job-title">{{ job.title }}</view>
         <view class="job-info">
           <text class="job-location">{{ job.province }}</text>
@@ -67,6 +67,12 @@ watch([selectedExam, selectedProvince], async ([newExam, newProvince]) => {
   const province = newProvince === '全部' ? '' : newProvince;
   await loadNotices(province, examType);
 });
+
+const navigateToDetail = (id) => {
+  uni.navigateTo({
+    url: `/pages/notice-detail/notice-detail?id=${id}`
+  });
+};
 
 // Initial load
 loadNotices();
