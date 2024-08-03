@@ -1,6 +1,5 @@
 <template>
   <view class="container">
-
     <view class="filter-container">
       <view class="filter-header">
         <text class="filter-title active">推荐</text>
@@ -20,51 +19,57 @@
           </view>
         </picker>
       </view>
+    </view>
 
-    <view class="job-list">
-      <view v-for="(job, index) in filteredJobs" :key="index" class="job-item">
+    <view v-if="loading" class="loading">加载中...</view>
+    <view v-else-if="error" class="error">{{ error }}</view>
+    <view v-else class="job-list">
+      <view v-for="job in notices" :key="job.id" class="job-item">
         <view class="job-title">{{ job.title }}</view>
         <view class="job-info">
-          <text class="job-location">{{ job.location }}</text>
-          <text class="job-type">{{ job.type }}</text>
+          <text class="job-location">{{ job.province }}</text>
+          <text class="job-type">{{ job.type === 1 ? '公务员' : '事业编' }}</text>
         </view>
       </view>
-    </view>
     </view>
   </view>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import {ref, watch} from 'vue';
+import {useNotices} from "@/utils/requests";
 
-const examTypes = ref(['全部', '公务员', '事业单位']);
-const provinces = ref(['全部', '北京', '上海', '广东', '江苏', '浙江', '福建', '山东', '四川', '湖北', '河南']);
+const examTypes = ['全部', '公务员', '事业编'];
+const provinces = [
+  '全部',
+  '北京', '天津', '上海', '重庆',  // 直辖市
+  '河北', '山西', '辽宁', '吉林', '黑龙江', '江苏', '浙江', '安徽',
+  '福建', '江西', '山东', '河南', '湖北', '湖南', '广东', '海南',
+  '四川', '贵州', '云南', '陕西', '甘肃', '青海',  // 省
+  '内蒙古', '广西', '西藏', '宁夏', '新疆',  // 自治区
+  '香港', '澳门', '台湾'  // 特别行政区和台湾省
+];
+const selectedExam = ref('全部');
+const selectedProvince = ref('全部');
 
-const selectedExam = ref('');
-const selectedProvince = ref('');
+const { notices, loading, error, loadNotices } = useNotices();
 
 const onExamChange = (e) => {
-  selectedExam.value = examTypes.value[e.detail.value];
+  selectedExam.value = examTypes[e.detail.value];
 };
 
 const onProvinceChange = (e) => {
-  selectedProvince.value = provinces.value[e.detail.value];
+  selectedProvince.value = provinces[e.detail.value];
 };
 
-const jobs = ref([
-  { title: '抚州市金溪县公开遴选教师193名任教方案', location: '江西', type: '事业单位' },
-  { title: '新余六中秋季招聘临聘教师6人公告', location: '江西', type: '' },
-  { title: '南昌市红谷滩区招聘156名医生公告', location: '江西', type: '' },
-]);
-
-const filteredJobs = computed(() => {
-  return jobs.value.filter(job => {
-    // if (selectedTags.value.exam !== '全部' && job.type !== selectedTags.value.exam) return false;
-    // if (selectedTags.value.status && job.status !== selectedTags.value.status) return false;
-    // if (selectedTags.value.province !== '全部' && job.location !== selectedTags.value.province) return false;
-    return true;
-  });
+watch([selectedExam, selectedProvince], async ([newExam, newProvince]) => {
+  const examType = newExam === '公务员' ? '1' : newExam === '事业编' ? '2' : '';
+  const province = newProvince === '全部' ? '' : newProvince;
+  await loadNotices(province, examType);
 });
+
+// Initial load
+loadNotices();
 </script>
 
 <style scoped>
@@ -149,5 +154,15 @@ const filteredJobs = computed(() => {
 
 .job-location, .job-type {
   margin-right: 10px;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
+}
+
+.error {
+  color: red;
 }
 </style>
