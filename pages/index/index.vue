@@ -6,18 +6,46 @@
       </view>
 
       <view class="filters">
-        <picker class="filter-item" :range="examTypes" @change="onExamChange">
+        <view class="filter-item" @tap="toggleDropdown('exam')">
           <view class="picker">
-            <text>{{ selectedExam || '考试' }}</text>
-            <uni-icons type="bottom" size="14"></uni-icons>
+            <text>{{ selectedExam }}</text>
+            <uni-icons :type="isExamOpen ? 'top' : 'bottom'" size="14"></uni-icons>
           </view>
-        </picker>
-        <picker class="filter-item" :range="provinces" @change="onProvinceChange">
+        </view>
+        <view class="filter-item" @tap="toggleDropdown('province')">
           <view class="picker">
-            <text>{{ selectedProvince || '省份' }}</text>
-            <uni-icons type="bottom" size="14"></uni-icons>
+            <text>{{ selectedProvince }}</text>
+            <uni-icons :type="isProvinceOpen ? 'top' : 'bottom'" size="14"></uni-icons>
           </view>
-        </picker>
+        </view>
+      </view>
+
+      <view v-if="isExamOpen" class="dropdown exam-dropdown">
+        <view class="dropdown-grid">
+          <view
+              v-for="exam in examTypes"
+              :key="exam"
+              class="dropdown-item"
+              :class="{ 'dropdown-item-selected': exam === selectedExam }"
+              @tap="handleSelect('exam', exam)"
+          >
+            {{ exam }}
+          </view>
+        </view>
+      </view>
+
+      <view v-if="isProvinceOpen" class="dropdown province-dropdown">
+        <view class="dropdown-grid">
+          <view
+              v-for="province in provinces"
+              :key="province"
+              class="dropdown-item"
+              :class="{ 'dropdown-item-selected': province === selectedProvince }"
+              @tap="handleSelect('province', province)"
+          >
+            {{ province }}
+          </view>
+        </view>
       </view>
     </view>
 
@@ -28,14 +56,13 @@
     <view v-else-if="error" class="error">{{ error }}</view>
     <view v-else-if="notices.length === 0" class="empty">暂无数据</view>
     <view v-else class="job-list">
-      <view v-for="job in notices" :key="job.id" class="job-item" @click="navigateToDetail(job.id)">
+      <view v-for="job in notices" :key="job.id" class="job-item" @tap="navigateToDetail(job.id)">
         <view class="job-title">{{ job.title }}</view>
         <view class="job-info">
           <text class="job-location-type">
             {{ job.province }}   ·
             {{ job.type === 1 ? '公务员' : '事业编' }}
           </text>
-
         </view>
       </view>
     </view>
@@ -46,32 +73,48 @@
 import { ref, watch, onMounted } from 'vue';
 import { useNotices } from "@/utils/requests";
 
-const examTypes = ['全部', '公务员', '事业编'];
+const examTypes = [
+  '考试', '公务员', '事业单位'
+];
 const provinces = [
-  '全部',
-  '北京', '天津', '上海', '重庆',
+  '省份', '北京', '天津', '上海', '重庆',
   '河北', '山西', '辽宁', '吉林', '黑龙江', '江苏', '浙江', '安徽',
   '福建', '江西', '山东', '河南', '湖北', '湖南', '广东', '海南',
   '四川', '贵州', '云南', '陕西', '甘肃', '青海',
   '内蒙古', '广西', '西藏', '宁夏', '新疆',
   '香港', '澳门', '台湾'
 ];
-const selectedExam = ref('全部');
-const selectedProvince = ref('全部');
+
+const isExamOpen = ref(false);
+const isProvinceOpen = ref(false);
+const selectedExam = ref('考试');
+const selectedProvince = ref('省份');
 
 const { notices, loading, error, loadNotices } = useNotices();
 
-const onExamChange = (e) => {
-  selectedExam.value = examTypes[e.detail.value];
+const toggleDropdown = (type) => {
+  if (type === 'exam') {
+    isExamOpen.value = !isExamOpen.value;
+    isProvinceOpen.value = false;
+  } else if (type === 'province') {
+    isProvinceOpen.value = !isProvinceOpen.value;
+    isExamOpen.value = false;
+  }
 };
 
-const onProvinceChange = (e) => {
-  selectedProvince.value = provinces[e.detail.value];
+const handleSelect = (type, value) => {
+  if (type === 'exam') {
+    selectedExam.value = value;
+    isExamOpen.value = false;
+  } else if (type === 'province') {
+    selectedProvince.value = value;
+    isProvinceOpen.value = false;
+  }
 };
 
 watch([selectedExam, selectedProvince], async ([newExam, newProvince]) => {
   const examType = newExam === '公务员' ? '1' : newExam === '事业编' ? '2' : '';
-  const province = newProvince === '全部' ? '' : newProvince;
+  const province = newProvince === '省份' ? '' : newProvince;
   await loadNotices(province, examType);
 });
 
@@ -86,7 +129,7 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .container {
   background-color: #fff;
   min-height: 100vh;
@@ -96,6 +139,7 @@ onMounted(() => {
   background-color: #fff;
   padding: 15px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .filter-header {
@@ -150,6 +194,39 @@ onMounted(() => {
   align-items: center;
 }
 
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 5px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dropdown-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+}
+
+.dropdown-item {
+  width: 33.33%;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.dropdown-item-selected {
+  color: #007AFF;
+  font-weight: bold;
+}
+
 .job-list {
   padding: 10px;
 }
@@ -159,10 +236,6 @@ onMounted(() => {
   margin-bottom: 15px;
   transition: all 0.3s ease;
   border-bottom: 1px solid #f0f0f0;
-}
-
-.job-item:active {
-  transform: scale(0.98);
 }
 
 .job-title {
