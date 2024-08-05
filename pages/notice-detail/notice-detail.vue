@@ -43,11 +43,11 @@
           </view>
         </view>
 
-        <view v-if="notice.sourceUrl" class="source-url">
+        <view v-if="notice.sourceUrl" class="source-url"  @tap="copySourceUrl">
           <text class="source-url-label">原文:</text>
           <text class="source-url-content" >
             {{ notice.title }}
-            <uni-icons type="star" color="grey" @tap="copySourceUrl"></uni-icons>
+<!--            <uni-icons type="star" color="grey"></uni-icons>-->
           </text>
           <text class="source-url-not">内容以官方公告为准，如有侵权，请联系删除</text>
         </view>
@@ -100,47 +100,56 @@ const downloadFile = (item) => {
     uni.showToast({title: '无效的文件链接', icon: 'none'});
     return;
   }
-
-  uni.showLoading({title: '下载中...'});
-
-  uni.downloadFile({
-    url: item.url,
-    success: (res) => {
-      if (res.statusCode === 200) {
-        uni.saveFile({
-          tempFilePath: res.tempFilePath,
-          success: (saveRes) => {
-            uni.hideLoading();
-            uni.showToast({title: '文件已保存', icon: 'success'});
-            console.log('文件已保存到：' + saveRes.savedFilePath);
-          },
-          fail: (err) => {
-            console.error('保存文件失败：', err);
-            uni.hideLoading();
-            uni.showToast({title: '保存失败', icon: 'none'});
-          }
-        });
-      } else {
-        uni.hideLoading();
-        uni.showToast({title: '下载失败', icon: 'none'});
-      }
+  uni.setClipboardData({
+    data: item.url,
+    success: () => {
+      uni.showToast({title: '下载链接已复制', icon: 'success'});
     },
-    fail: (err) => {
-      console.error('下载文件失败：', err);
-      uni.hideLoading();
-      uni.showToast({title: '下载失败', icon: 'none'});
+    fail: () => {
+      uni.showToast({title: '下载链接复制失败', icon: 'none'});
     }
   });
+
+  // uni.showLoading({title: '下载中...'});
+  //
+  // uni.downloadFile({
+  //   url: item.url,
+  //   success: (res) => {
+  //     if (res.statusCode === 200) {
+  //       uni.saveFile({
+  //         tempFilePath: res.tempFilePath,
+  //         success: (saveRes) => {
+  //           uni.hideLoading();
+  //           uni.showToast({title: '文件已保存', icon: 'success'});
+  //           console.log('文件已保存到：' + saveRes.savedFilePath);
+  //         },
+  //         fail: (err) => {
+  //           console.error('保存文件失败：', err);
+  //           uni.hideLoading();
+  //           uni.showToast({title: '保存失败', icon: 'none'});
+  //         }
+  //       });
+  //     } else {
+  //       uni.hideLoading();
+  //       uni.showToast({title: '下载失败', icon: 'none'});
+  //     }
+  //   },
+  //   fail: (err) => {
+  //     console.error('下载文件失败：', err);
+  //     uni.hideLoading();
+  //     uni.showToast({title: '下载失败', icon: 'none'});
+  //   }
+  // });
 };
 
 const copySourceUrl = () => {
   uni.setClipboardData({
     data: notice.value.sourceUrl,
     success: () => {
-      uni.showToast({title: '链接已复制', icon: 'success'});
+      uni.showToast({title: '原文链接已复制', icon: 'success'});
     },
     fail: () => {
-      uni.showToast({title: '复制失败', icon: 'none'});
+      uni.showToast({title: '原文链接复制失败', icon: 'none'});
     }
   });
 };
@@ -228,32 +237,32 @@ const copySourceUrl = () => {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 15px;
-  color: #333;
+  color: #1B2126;
 }
 
 .affix-item {
   display: flex;
   align-items: center;
   padding: 10px;
-  background-color: #f5f5f5;
+  background-color: #fff;
   border-radius: 15px;
   margin-bottom: 10px;
 }
 
 .affix-name {
   font-size: 15px;
-  color: #333;
+  color: #1B2126;
   margin-left: 10px;
 }
 
 .source-url-label {
   font-weight: bold;
-  color: #333;
+  color: #8E9092;
 }
 
 .source-url-content {
   font-size: 16px;
-  color: grey;
+  color: #616569;
   margin-top: 5px;
 }
 
