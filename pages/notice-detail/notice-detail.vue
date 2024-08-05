@@ -13,17 +13,20 @@
         <view class="notice-title">{{ notice.title }}</view>
         <view class="notice-info">
           <view class="info-item">
-            <uni-icons type="location" size="14" color="#666"></uni-icons>
-            <text>{{ notice.province }}</text>
+            <text>{{ notice.province }} </text>
           </view>
           <view class="info-item">
-            <uni-icons type="person" size="14" color="#666"></uni-icons>
+            <text>·</text>
+          </view>
+          <view class="info-item">
             <text>{{ notice.type === 1 ? '公务员' : '事业编' }}</text>
           </view>
-          <view class="info-item">
-            <uni-icons type="calendar" size="14" color="#666"></uni-icons>
-            <text>{{ formatDate(notice.addTime) }}</text>
-          </view>
+<!--          <view class="info-item">-->
+<!--            <text>·</text>-->
+<!--          </view>-->
+<!--          <view class="info-item">-->
+<!--            <text>{{ formatDate(notice.addTime) }}</text>-->
+<!--          </view>-->
         </view>
       </view>
 
@@ -32,20 +35,23 @@
       </view>
 
       <view class="notice-content">
-        <rich-text :nodes="notice.content"></rich-text>
-      </view>
+        <rich-text :nodes="notice.content" selectable="true" ></rich-text>
+        <view v-if="parsedAffix.length > 0" class="notice-affix">
+          <view class="affix-title">附件</view>
+          <view v-for="(item, index) in parsedAffix" :key="index" class="affix-item" @tap="downloadFile(item)">
+            <text class="affix-name">{{ item.title }}</text>
+          </view>
+        </view>
 
-      <view v-if="parsedAffix.length > 0" class="notice-affix">
-        <view class="affix-title">附件：</view>
-        <view v-for="(item, index) in parsedAffix" :key="index" class="affix-item" @tap="downloadFile(item)">
-          <text class="affix-name">{{ item.title }}</text>
+        <view v-if="notice.sourceUrl" class="source-url">
+          <text class="source-url-label">原文:</text>
+          <text class="source-url-content" >
+            {{ notice.title }}
+            <uni-icons type="star" color="grey" @tap="copySourceUrl"></uni-icons>
+          </text>
+          <text class="source-url-not">内容以官方公告为准，如有侵权，请联系删除</text>
         </view>
       </view>
-
-      <view v-if="notice.sourceUrl" class="source-url">
-        <text class="source-url-label">原文链接：</text>
-        <text class="source-url-content" @longpress="copySourceUrl">{{ notice.sourceUrl }}</text>
-    </view>
   </view>
   </view>
 </template>
@@ -149,12 +155,35 @@ const copySourceUrl = () => {
   padding: 20px;
 }
 
-.notice-header, .notice-digest, .notice-content, .notice-affix, .source-url {
+.notice-header, .notice-content {
   background-color: #ffffff;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.notice-digest {
+  background-color: #e6f7ff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+}
+
+.notice-digest text {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.notice-affix {
+  background-color: #e6f7ff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.source-url {
+  padding: 20px;
 }
 
 .notice-title {
@@ -175,23 +204,11 @@ const copySourceUrl = () => {
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: #666;
+  color: grey;
 }
 
 .info-item text {
   margin-left: 5px;
-}
-
-.notice-digest {
-  background-color: #e6f7ff;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #0066cc;
-}
-
-.notice-digest text {
-  display: block;
-  margin-bottom: 8px;
 }
 
 .notice-content {
@@ -218,8 +235,8 @@ const copySourceUrl = () => {
   display: flex;
   align-items: center;
   padding: 10px;
-  background-color: #f0f0f0;
-  border-radius: 4px;
+  background-color: #f5f5f5;
+  border-radius: 15px;
   margin-bottom: 10px;
 }
 
@@ -235,8 +252,15 @@ const copySourceUrl = () => {
 }
 
 .source-url-content {
-  color: #007AFF;
-  text-decoration: underline;
+  font-size: 16px;
+  color: grey;
+  margin-top: 5px;
+}
+
+.source-url-not {
+  display: block;
+  color: grey;
+  font-size: 12px;
 }
 
 .loading, .error {
