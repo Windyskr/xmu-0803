@@ -31,13 +31,11 @@
       <view v-for="job in notices" :key="job.id" class="job-item" @click="navigateToDetail(job.id)">
         <view class="job-title">{{ job.title }}</view>
         <view class="job-info">
-          <text class="job-location">
-            <uni-icons type="location" size="14" color="#666"></uni-icons>
-            {{ job.province }}
-          </text>
-          <text class="job-type" :class="{ 'type-civil': job.type === 1, 'type-institution': job.type === 2 }">
+          <text class="job-location-type">
+            {{ job.province }}   ·
             {{ job.type === 1 ? '公务员' : '事业编' }}
           </text>
+
         </view>
       </view>
     </view>
@@ -90,7 +88,7 @@ onMounted(() => {
 
 <style scoped>
 .container {
-  background-color: #f5f5f5;
+  background-color: #fff;
   min-height: 100vh;
 }
 
@@ -157,12 +155,10 @@ onMounted(() => {
 }
 
 .job-item {
-  background-color: #fff;
   padding: 20px;
   margin-bottom: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .job-item:active {
@@ -183,26 +179,11 @@ onMounted(() => {
   color: #666;
 }
 
-.job-location {
+.job-location-type {
+  color: grey;
   display: flex;
   align-items: center;
   margin-right: 15px;
-}
-
-.job-type {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-.type-civil {
-  background-color: #e6f7ff;
-  color: #1890ff;
-}
-
-.type-institution {
-  background-color: #f6ffed;
-  color: #52c41a;
 }
 
 .loading, .error, .empty {
