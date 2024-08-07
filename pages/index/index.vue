@@ -33,22 +33,44 @@
           </view>
         </view>
       </view>
+
+      <view v-if="isProvinceOpen" class="dropdown province-dropdown">
+        <view class="dropdown-grid">
+          <view
+              v-for="province in provinces"
+              :key="province"
+              class="dropdown-item"
+              :class="{ 'dropdown-item-selected': province === selectedProvince }"
+              @tap="handleSelect('province', province)"
+          >
+            {{ province }}
+          </view>
+        </view>
+      </view>
     </view>
 
-    <view v-if="loading" class="loading">
-      <uni-icons type="spinner-cycle" size="24" color="#007AFF"></uni-icons>
-      <text>加载中...</text>
-    </view>
-    <view v-else-if="error" class="error">{{ error }}</view>
-    <view v-else-if="notices.length === 0" class="empty">暂无数据</view>
-    <view v-else class="job-list">
-      <view v-for="job in notices" :key="job.id" class="job-item" @tap="navigateToDetail(job.id)">
-        <view class="job-title">{{ job.title }}</view>
-        <view class="job-info">
-          <text class="job-location-type">
-            {{ job.province }}   ·
-            {{ job.type === 1 ? '公务员' : '事业编' }}
-          </text>
+    <view class="content-container">
+      <view
+          class="overlay"
+          v-if="isExamOpen || isProvinceOpen"
+          @tap="closeDropdowns"
+      ></view>
+
+      <view v-if="loading" class="loading">
+        <uni-icons type="spinner-cycle" size="24" color="#007AFF"></uni-icons>
+        <text>加载中...</text>
+      </view>
+      <view v-else-if="error" class="error">{{ error }}</view>
+      <view v-else-if="notices.length === 0" class="empty">暂无数据</view>
+      <view v-else class="job-list">
+        <view v-for="job in notices" :key="job.id" class="job-item" @tap="navigateToDetail(job.id)">
+          <view class="job-title">{{ job.title }}</view>
+          <view class="job-info">
+            <text class="job-location-type">
+              {{ job.province }}   ·
+              {{ job.type === 1 ? '公务员' : '事业编' }}
+            </text>
+          </view>
         </view>
       </view>
     </view>
@@ -98,6 +120,11 @@ const handleSelect = (type, value) => {
   }
 };
 
+const closeDropdowns = () => {
+  isExamOpen.value = false;
+  isProvinceOpen.value = false;
+};
+
 watch([selectedExam, selectedProvince], async ([newExam, newProvince]) => {
   const examType = newExam === '公务员' ? '1' : newExam === '事业编' ? '2' : '';
   const province = newProvince === '省份' ? '' : newProvince;
@@ -126,6 +153,7 @@ onMounted(() => {
   padding: 15px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
+  z-index: 1000;
 }
 
 .filter-header {
@@ -166,7 +194,7 @@ onMounted(() => {
   background-color: #ffffff;
   padding: 10px 15px;
   transition: all 0.3s ease;
-  border-radius: 8px;
+  border-bottom: none;
 }
 
 .filter-item:active {
@@ -181,16 +209,17 @@ onMounted(() => {
 
 .dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% - 1px);
   left: 0;
   width: 100%;
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  margin-top: 5px;
+  z-index: 999;
   max-height: 300px;
   overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-top: none;
 }
 
 .dropdown-grid {
@@ -200,7 +229,7 @@ onMounted(() => {
 }
 
 .dropdown-item {
-  width: 33.33%;
+  width: calc(33.33% - 4px);
   text-align: center;
   padding: 10px;
   font-size: 14px;
@@ -215,8 +244,23 @@ onMounted(() => {
   border: 1px solid #007AFF;
 }
 
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.content-container {
+  position: relative;
+}
+
 .job-list {
   padding: 10px;
+  position: relative;
 }
 
 .job-item {
