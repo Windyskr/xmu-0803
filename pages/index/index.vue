@@ -33,20 +33,6 @@
           </view>
         </view>
       </view>
-
-      <view v-if="isProvinceOpen" class="dropdown province-dropdown">
-        <view class="dropdown-grid">
-          <view
-              v-for="province in provinces"
-              :key="province"
-              class="dropdown-item"
-              :class="{ 'dropdown-item-selected': province === selectedProvince }"
-              @tap="handleSelect('province', province)"
-          >
-            {{ province }}
-          </view>
-        </view>
-      </view>
     </view>
 
     <view v-if="loading" class="loading">
@@ -178,10 +164,9 @@ onMounted(() => {
 .filter-item {
   width: 48%;
   background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
   padding: 10px 15px;
   transition: all 0.3s ease;
+  border-radius: 8px;
 }
 
 .filter-item:active {
@@ -200,7 +185,6 @@ onMounted(() => {
   left: 0;
   width: 100%;
   background-color: #fff;
-  border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -220,11 +204,15 @@ onMounted(() => {
   text-align: center;
   padding: 10px;
   font-size: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin: 2px;
 }
 
 .dropdown-item-selected {
   color: #007AFF;
-  font-weight: bold;
+  background-color: #e6f7ff;
+  border: 1px solid #007AFF;
 }
 
 .job-list {
