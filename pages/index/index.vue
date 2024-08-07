@@ -261,6 +261,7 @@ onMounted(() => {
 .job-list {
   padding: 10px;
   position: relative;
+  height: calc(100vh - 200px);
 }
 
 .job-item {
